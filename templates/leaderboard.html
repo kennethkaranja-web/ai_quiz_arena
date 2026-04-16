@@ -45,5 +45,11 @@
         {% endfor %}
     </table>
     <a href="/quiz">Back to Quiz</a>
+<script>
+    // Refresh leaderboard every 10 seconds
+    setTimeout(function(){
+        window.location.reload();
+    }, 10000); // 10000 ms = 10 seconds
+</script>
 </body>
 </html>
