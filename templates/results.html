@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .correct { color: green; }
+        .incorrect { color: red; }
+        .progress {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            width: {{ (score / total * 100)|round(0) }}%;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Score: {{ score }} / {{ total }} ({{ (score / total * 100)|round(0) }}%)</h1>
+
+    <!-- Progress bar -->
+    <div class="progress">
+        <div class="progress-bar">{{ (score / total * 100)|round(0) }}%</div>
+    </div>
+
+    <h2>Answer Breakdown:</h2>
+    <ul>
+        {% for r in results %}
+            <li>
+                <strong>Q{{ r.id }}:</strong> {{ r.question }}<br>
+                Your Answer: {{ r.user_answer }} | Correct Answer: {{ r.correct_answer }}<br>
+                {% if r.is_correct %}
+                    <span class="correct">✅ Correct</span>
+                {% else %}
+                    <span class="incorrect">❌ Incorrect</span>
+                {% endif %}
+            </li>
+            <br>
+        {% endfor %}
+    </ul>
+    <a href="/">Play Again</a>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Quiz Arena</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        .question {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .options label {
+            display: block;
+            margin: 5px 0;
+        }
+        .submit-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Quiz Arena</h1>
+    <form method="POST" action="/submit">
+        {% for q in questions %}
+            <div class="question">
+                <p><strong>Q{{ q.id }}:</strong> {{ q.question }}</p>
+                <div class="options">
+                    {% for option in q.options %}
+                        <label>
+                            <input type="radio" name="q{{ q.id }}" value="{{ option[0] }}">
+                            {{ option }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <button type="submit" class="submit-btn">Submit Quiz</button>
+    </form>
+</body>
+</html>
