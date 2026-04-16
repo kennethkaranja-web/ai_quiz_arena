@@ -1,51 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Quiz Results</title>
+    <title>Results - AI Quiz Arena</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .correct { color: green; }
-        .incorrect { color: red; }
-        .progress {
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        h1, h2 { text-align: center; }
+        .score-box {
+            text-align: center;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background: #fff;
+            width: 400px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
             width: 100%;
             background-color: #ddd;
             border-radius: 5px;
+            overflow: hidden;
             margin: 10px 0;
         }
-        .progress-bar {
+        .progress {
             height: 20px;
             background-color: #4CAF50;
-            width: {{ (score / total * 100)|round(0) }}%;
-            border-radius: 5px;
             text-align: center;
             color: white;
-            font-size: 12px;
+            line-height: 20px;
+        }
+        .answers {
+            margin: 20px auto;
+            width: 80%;
+        }
+        .correct { background-color: #c8e6c9; }
+        .incorrect { background-color: #ffcdd2; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        ol {
+            width: 300px;
+            margin: 0 auto;
+            text-align: left;
         }
     </style>
 </head>
 <body>
-    <h1>Your Score: {{ score }} / {{ total }} ({{ (score / total * 100)|round(0) }}%)</h1>
-
-    <!-- Progress bar -->
-    <div class="progress">
-        <div class="progress-bar">{{ (score / total * 100)|round(0) }}%</div>
+    <h1>Quiz Results</h1>
+    <div class="score-box">
+        <h2>Your Score: {{ score }} / {{ total }}</h2>
+        <p>Percentage: {{ (score / total * 100)|round(2) }}%</p>
+        <div class="progress-bar">
+            <div class="progress" style="width: {{ (score / total * 100)|round(2) }}%;">
+                {{ (score / total * 100)|round(2) }}%
+            </div>
+        </div>
     </div>
 
-    <h2>Answer Breakdown:</h2>
-    <ul>
-        {% for r in results %}
-            <li>
-                <strong>Q{{ r.id }}:</strong> {{ r.question }}<br>
-                Your Answer: {{ r.user_answer }} | Correct Answer: {{ r.correct_answer }}<br>
-                {% if r.is_correct %}
-                    <span class="correct">✅ Correct</span>
-                {% else %}
-                    <span class="incorrect">❌ Incorrect</span>
-                {% endif %}
-            </li>
-            <br>
+    <div class="answers">
+        <h2>Answer Breakdown</h2>
+        <table>
+            <tr>
+                <th>Q#</th>
+                <th>Question</th>
+                <th>Your Answer</th>
+                <th>Correct Answer</th>
+                <th>Status</th>
+            </tr>
+            {% for r in results %}
+            <tr class="{{ 'correct' if r.is_correct else 'incorrect' }}">
+                <td>{{ r.id }}</td>
+                <td>{{ r.question }}</td>
+                <td>{{ r.user_answer }}</td>
+                <td>{{ r.correct_answer }}</td>
+                <td>{{ '✔ Correct' if r.is_correct else '✘ Incorrect' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <h2>Leaderboard (Top 5 Players)</h2>
+    <ol>
+        {% for player, s in leaderboard %}
+            <li>{{ player }} — {{ s }} / {{ total }}</li>
         {% endfor %}
-    </ul>
-    <a href="/">Play Again</a>
+    </ol>
+
+    <div style="text-align:center; margin-top:20px;">
+        <a href="/quiz">Try Again</a>
+    </div>
 </body>
 </html>
