@@ -36,7 +36,7 @@
     <form method="POST" action="/submit">
         {% for q in questions %}
         <div class="question-box">
-            <h3>Q{{ q.id }}: {{ q.question }}</h3>
+            <h3>Q{{ q.id }} of {{ questions|length }}: {{ q.question }}</h3>
             {% for option in q.options %}
                 <label>
                     <input type="radio" name="q{{ q.id }}" value="{{ option[0] }}" required>
