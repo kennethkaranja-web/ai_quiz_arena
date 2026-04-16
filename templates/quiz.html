@@ -29,10 +29,17 @@
             cursor: pointer;
         }
         button:hover { background: #45a049; }
+        #timer {
+            text-align: center;
+            color: red;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <h1>AI Quiz Arena</h1>
+    <h2 id="timer">Time Remaining: 10:00</h2>
     <form method="POST" action="/submit">
         {% for q in questions %}
         <div class="question-box">
@@ -47,5 +54,27 @@
         {% endfor %}
         <button type="submit">Submit Quiz</button>
     </form>
+
+    <script>
+        // Set timer duration (in seconds)
+        let timeLeft = 600; // 10 minutes = 600 seconds
+
+        function updateTimer() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            document.getElementById("timer").textContent =
+                `Time Remaining: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time is up! Submitting your quiz...");
+                document.querySelector("form").submit();
+            }
+            timeLeft--;
+        }
+
+        // Run every second
+        let timerInterval = setInterval(updateTimer, 1000);
+    </script>
 </body>
 </html>
