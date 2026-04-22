@@ -31,23 +31,30 @@
 
     <!-- AJAX auto-refresh script -->
     <script>
-        function refreshLeaderboard() {
-            fetch("/leaderboard")
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, "text/html");
-                    const newTable = doc.querySelector("table");
-                    const oldTable = document.querySelector("table");
-                    if (newTable && oldTable) {
-                        oldTable.innerHTML = newTable.innerHTML;
-                    }
-                })
-                .catch(err => console.error("Error refreshing leaderboard:", err));
-        }
+    function refreshLeaderboard() {
+        fetch("/leaderboard_data")
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector("table").getElementsByTagName("tbody")[0];
+                tableBody.innerHTML = ""; // clear old rows
 
-        // Refresh every 10 seconds
-        setInterval(refreshLeaderboard, 10000);
-    </script>
+                data.forEach((entry, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.player}</td>
+                        <td>${entry.score} / {{ total }}</td>
+                        <td>${entry.timestamp}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(err => console.error("Error refreshing leaderboard:", err));
+    }
+
+    // Refresh every 10 seconds
+    setInterval(refreshLeaderboard, 10000);
+</script>
+
 </body>
 </html>

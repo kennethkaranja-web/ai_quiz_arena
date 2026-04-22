@@ -141,19 +141,21 @@ def submit():
 
     # Reload leaderboard from file
     leaderboard = []
-    try:
-        with open("leaderboard.txt", "r") as f:
-            for line in f:
-                parts = line.strip().split(",")
-                if len(parts) == 3:
-                    name, s, ts = parts
-                    leaderboard.append((name, int(s), ts))
-                else:
-                    # fallback for old entries without timestamp
-                    name, s = parts
-                    leaderboard.append((name, int(s), "N/A"))
-    except FileNotFoundError:
-        pass
+try:
+    with open("leaderboard.txt", "r") as f:
+        for line in f:
+            parts = line.strip().split(",")
+            if len(parts) == 3:
+                name, s, ts = parts
+                leaderboard.append((name, int(s), ts))
+            elif len(parts) == 2:
+                name, s = parts
+                leaderboard.append((name, int(s), "N/A"))
+            else:
+                continue  # skip malformed lines
+except FileNotFoundError:
+    pass
+
 
     leaderboard.sort(key=lambda x: x[1], reverse=True)
 
@@ -164,22 +166,32 @@ def submit():
         results=results,
         leaderboard=leaderboard
     )
-@app.route('/leaderboard')
-def show_leaderboard():
-    leaderboard_data = []
+from flask import jsonify
+
+@app.route('/leaderboard_data')
+def leaderboard_data():
+    leaderboard = []
     try:
         with open("leaderboard.txt", "r") as f:
             for line in f:
                 parts = line.strip().split(",")
                 if len(parts) == 3:
                     name, s, ts = parts
-                    leaderboard_data.append((name, int(s), ts))
-                else:
-                    # fallback for old entries without timestamp
+                    leaderboard.append({"player": name, "score": int(s), "timestamp": ts})
+                elif len(parts) == 2:
                     name, s = parts
-                    leaderboard_data.append((name, int(s), "N/A"))
+                    leaderboard.append({"player": name, "score": int(s), "timestamp": "N/A"})
     except FileNotFoundError:
         pass
 
-    leaderboard_data.sort(key=lambda x: x[1], reverse=True)
-    return render_template('leaderboard.html', leaderboard=leaderboard_data, total=len(questions))
+    # Sort by score (desc), then timestamp (asc)
+    from datetime import datetime
+    def parse_timestamp(ts):
+        try:
+            return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+        except Exception:
+            return datetime.min
+
+    leaderboard.sort(key=lambda x: (-x["score"], parse_timestamp(x["timestamp"])))
+
+    return jsonify(leaderboard)
