@@ -28,5 +28,26 @@
         </tr>
         {% endfor %}
     </table>
+
+    <!-- AJAX auto-refresh script -->
+    <script>
+        function refreshLeaderboard() {
+            fetch("/leaderboard")
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, "text/html");
+                    const newTable = doc.querySelector("table");
+                    const oldTable = document.querySelector("table");
+                    if (newTable && oldTable) {
+                        oldTable.innerHTML = newTable.innerHTML;
+                    }
+                })
+                .catch(err => console.error("Error refreshing leaderboard:", err));
+        }
+
+        // Refresh every 10 seconds
+        setInterval(refreshLeaderboard, 10000);
+    </script>
 </body>
 </html>
