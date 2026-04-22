@@ -11,6 +11,9 @@
 <body>
     <h2>You have already submitted the quiz.</h2>
     <p>Only one attempt is allowed per user.</p>
+    {% if timestamp %}
+        <p>Your first submission was at: {{ timestamp }}</p>
+    {% endif %}
     <a href="/leaderboard">View Leaderboard</a>
 </body>
 </html>

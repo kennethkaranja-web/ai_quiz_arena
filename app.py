@@ -101,6 +101,8 @@ def quiz():
         return redirect(url_for('home'))
     return render_template('quiz.html', questions=questions)
 
+from datetime import datetime
+
 @app.route('/submit', methods=['POST'])
 def submit():
     score = 0
@@ -119,27 +121,37 @@ def submit():
             "is_correct": is_correct
         })
 
-        username = session.get('username', 'Anonymous')
+    username = session.get('username', 'Anonymous')
 
-    # 🚨 Single-attempt enforcement
+    # 🚨 Single-attempt enforcement with timestamp
     try:
         with open("leaderboard.txt", "r") as f:
             for line in f:
-                if line.startswith(username + ","):
-                    return render_template("error.html")
+                parts = line.strip().split(",")
+                if len(parts) >= 2 and line.startswith(username + ","):
+                    ts = parts[2] if len(parts) == 3 else "N/A"
+                    return render_template("error.html", timestamp=ts)
     except FileNotFoundError:
         pass
-# Save score to file
-with open("leaderboard.txt", "a") as f:
-    f.write(f"{username},{score}\n")
 
-# Reload leaderboard from file
+    # Save score to file with timestamp
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("leaderboard.txt", "a") as f:
+        f.write(f"{username},{score},{timestamp}\n")
+
+    # Reload leaderboard from file
     leaderboard = []
     try:
         with open("leaderboard.txt", "r") as f:
             for line in f:
-                name, s = line.strip().split(",")
-                leaderboard.append((name, int(s)))
+                parts = line.strip().split(",")
+                if len(parts) == 3:
+                    name, s, ts = parts
+                    leaderboard.append((name, int(s), ts))
+                else:
+                    # fallback for old entries without timestamp
+                    name, s = parts
+                    leaderboard.append((name, int(s), "N/A"))
     except FileNotFoundError:
         pass
 
@@ -150,23 +162,24 @@ with open("leaderboard.txt", "a") as f:
         score=score,
         total=len(questions),
         results=results,
-        leaderboard=leaderboard[:5]
+        leaderboard=leaderboard
     )
-
 @app.route('/leaderboard')
 def show_leaderboard():
     leaderboard_data = []
     try:
         with open("leaderboard.txt", "r") as f:
             for line in f:
-                name, s = line.strip().split(",")
-                leaderboard_data.append((name, int(s)))
+                parts = line.strip().split(",")
+                if len(parts) == 3:
+                    name, s, ts = parts
+                    leaderboard_data.append((name, int(s), ts))
+                else:
+                    # fallback for old entries without timestamp
+                    name, s = parts
+                    leaderboard_data.append((name, int(s), "N/A"))
     except FileNotFoundError:
         pass
 
     leaderboard_data.sort(key=lambda x: x[1], reverse=True)
-    return render_template('leaderboard.html', leaderboard=leaderboard_data)
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    return render_template('leaderboard.html', leaderboard=leaderboard_data, total=len(questions))
