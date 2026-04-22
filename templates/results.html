@@ -1,97 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Results - AI Quiz Arena</title>
+    <title>Quiz Results</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
         h1, h2 { text-align: center; }
-        .score-box {
-            text-align: center;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            background: #fff;
-            width: 400px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+        .score-box { text-align: center; margin: 20px; font-size: 20px; }
         .progress-bar {
-            width: 100%;
-            background-color: #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 10px 0;
+            width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden;
+            margin: 20px auto; height: 25px;
         }
         .progress {
-            height: 20px;
-            background-color: #4CAF50;
-            text-align: center;
-            color: white;
-            line-height: 20px;
+            height: 100%; background-color: #4CAF50; text-align: center; color: white;
+            line-height: 25px;
         }
-        .answers {
-            margin: 20px auto;
-            width: 80%;
-        }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
         .correct { background-color: #c8e6c9; }
         .incorrect { background-color: #ffcdd2; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        ol {
-            width: 300px;
-            margin: 0 auto;
-            text-align: left;
-        }
+        ol { width: 60%; margin: 20px auto; }
     </style>
 </head>
 <body>
     <h1>Quiz Results</h1>
+
     <div class="score-box">
-        <h2>Your Score: {{ score }} / {{ total }}</h2>
-        <p>Percentage: {{ (score / total * 100)|round(2) }}%</p>
-        <div class="progress-bar">
-            <div class="progress" style="width: {{ (score / total * 100)|round(2) }}%;">
-                {{ (score / total * 100)|round(2) }}%
-            </div>
+        Your Score: {{ score }} / {{ total }}
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress" style="width: {{ (score / total) * 100 }}%;">
+            {{ (score / total) * 100 | round(2) }}%
         </div>
     </div>
 
-    <div class="answers">
-        <h2>Answer Breakdown</h2>
-        <table>
-            <tr>
-                <th>Q#</th>
-                <th>Question</th>
-                <th>Your Answer</th>
-                <th>Correct Answer</th>
-                <th>Status</th>
-            </tr>
-            {% for r in results %}
-            <tr class="{{ 'correct' if r.is_correct else 'incorrect' }}">
-                <td>{{ r.id }}</td>
-                <td>{{ r.question }}</td>
-                <td>{{ r.user_answer }}</td>
-                <td>{{ r.correct_answer }}</td>
-                <td>{{ '✔ Correct' if r.is_correct else '✘ Incorrect' }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-
-    <h2>Leaderboard (Top 5 Players)</h2>
-    <ol>
-        {% for player, s in leaderboard %}
-            <li>{{ player }} — {{ s }} / {{ total }}</li>
+    <h2>Answer Breakdown</h2>
+    <table>
+        <tr>
+            <th>Q#</th>
+            <th>Question</th>
+            <th>Your Answer</th>
+            <th>Correct Answer</th>
+            <th>Status</th>
+        </tr>
+        {% for r in results %}
+        <tr class="{{ 'correct' if r.is_correct else 'incorrect' }}">
+            <td>{{ r.id }}</td>
+            <td>{{ r.question }}</td>
+            <td>{{ r.user_answer if r.user_answer else 'No Answer' }}</td>
+            <td>{{ r.correct_answer }}</td>
+            <td>{{ 'Correct' if r.is_correct else 'Incorrect' }}</td>
+        </tr>
         {% endfor %}
-    </ol>
+    </table>
 
+    <h2>Leaderboard</h2>
+    <table>
+        <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Score</th>
+            <th>Submitted At</th>
+        </tr>
+        {% for player, s, ts in leaderboard %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ player }}</td>
+            <td>{{ s }} / {{ total }}</td>
+            <td>{{ ts }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
-
