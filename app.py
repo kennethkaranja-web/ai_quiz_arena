@@ -89,7 +89,9 @@ def home():
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form.get("username")
+    first = request.form['first_name'].strip()
+    last = request.form['last_name'].strip()
+    username = f"{first} {last}"
     session['username'] = username
     return redirect(url_for('quiz'))
 
@@ -117,11 +119,20 @@ def submit():
             "is_correct": is_correct
         })
 
-    username = session.get('username', 'Anonymous')
+        username = session.get('username', 'Anonymous')
 
-    # Save score to file
-    with open("leaderboard.txt", "a") as f:
-        f.write(f"{username},{score}\n")
+    # 🚨 Single-attempt enforcement
+    try:
+        with open("leaderboard.txt", "r") as f:
+            for line in f:
+                if line.startswith(username + ","):
+                    return render_template("error.html")
+    except FileNotFoundError:
+        pass
+# Save score to file
+with open("leaderboard.txt", "a") as f:
+    f.write(f"{username},{score}\n")
+
 # Reload leaderboard from file
     leaderboard = []
     try:

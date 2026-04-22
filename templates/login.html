@@ -37,7 +37,12 @@
     <h1>AI Quiz Arena</h1>
     <div class="login-box">
         <form method="POST" action="/login">
-            <input type="text" name="username" placeholder="Enter your name" required>
+            <label>First Name:</label>
+            <input type="text" name="first_name" required>
+            <br>
+            <label>Last Name:</label>
+            <input type="text" name="last_name" required>
+            <br>
             <button type="submit">Start Quiz</button>
         </form>
     </div>
