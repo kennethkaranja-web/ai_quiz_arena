@@ -9,10 +9,17 @@
         .question { margin-bottom: 20px; }
         .options label { display: block; margin: 5px 0; }
         input[type="submit"] { display: block; margin: 20px auto; padding: 10px 20px; }
+        #timer { text-align: center; font-size: 20px; margin-bottom: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>AI Prompt Engineering Quiz</h1>
+
+    <!-- Countdown Timer -->
+    <div id="timer">
+        Time Remaining: <span id="time">05:00</span>
+    </div>
+
     <form method="POST" action="{{ url_for('submit') }}">
         {% for q in questions %}
         <div class="question">
@@ -27,5 +34,28 @@
         {% endfor %}
         <input type="submit" value="Submit Quiz">
     </form>
+
+    <!-- Timer Script -->
+    <script>
+        // Set timer duration (in seconds)
+        let timeLeft = 5 * 60; // 5 minutes
+
+        function updateTimer() {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            document.getElementById("time").textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time is up! Submitting your quiz...");
+                document.querySelector("form").submit(); // auto-submit when time runs out
+            }
+            timeLeft--;
+        }
+
+        let timerInterval = setInterval(updateTimer, 1000);
+        updateTimer(); // initialize immediately
+    </script>
 </body>
 </html>
