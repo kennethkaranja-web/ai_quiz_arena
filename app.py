@@ -191,3 +191,25 @@ def leaderboard_page():
     leaderboard.sort(key=lambda x: (-x[1], parse_timestamp(x[2])))
 
     return render_template("leaderboard.html", leaderboard=leaderboard, total=len(questions))
+
+
+@app.route('/leaderboard_data')
+def leaderboard_data():
+    leaderboard = []
+    try:
+        with open("leaderboard.txt", "r") as f:
+            for line in f:
+                parts = line.strip().split(",")
+                if len(parts) == 3:
+                    name, s, ts = parts
+                    leaderboard.append({"player": name, "score": int(s), "timestamp": ts})
+                elif len(parts) == 2:
+                    name, s = parts
+                    leaderboard.append({"player": name, "score": int(s), "timestamp": "N/A"})
+    except FileNotFoundError:
+        pass
+
+    # Sort by score desc, timestamp asc
+    leaderboard.sort(key=lambda x: (-x["score"], parse_timestamp(x["timestamp"])))
+
+    return jsonify(leaderboard)
