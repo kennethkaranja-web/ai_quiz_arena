@@ -8,6 +8,7 @@
         table { width: 80%; margin: 20px auto; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #f2f2f2; }
+        #lastUpdated { text-align: center; margin-top: 10px; font-size: 14px; color: #555; }
     </style>
 </head>
 <body>
@@ -33,6 +34,8 @@
         </tbody>
     </table>
 
+    <div id="lastUpdated">Last updated: just now</div>
+
     <!-- AJAX auto-refresh script -->
     <script>
         function refreshLeaderboard() {
@@ -52,12 +55,18 @@
                         `;
                         tableBody.appendChild(row);
                     });
+
+                    // update timestamp
+                    const now = new Date();
+                    document.getElementById("lastUpdated").textContent =
+                        "Last updated: " + now.toLocaleTimeString();
                 })
                 .catch(err => console.error("Error refreshing leaderboard:", err));
         }
 
         // Refresh every 10 seconds
         setInterval(refreshLeaderboard, 10000);
+        refreshLeaderboard(); // run immediately once
     </script>
 </body>
 </html>
