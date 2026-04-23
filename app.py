@@ -1,8 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # Needed for sessions
+
+# Helper for timestamp parsing
+def parse_timestamp(ts):
+    try:
+        return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return datetime.min
 
 # Full 25-question quiz
 questions = [
@@ -101,8 +109,6 @@ def quiz():
         return redirect(url_for('home'))
     return render_template('quiz.html', questions=questions)
 
-from datetime import datetime
-
 @app.route('/submit', methods=['POST'])
 def submit():
     score = 0
@@ -155,11 +161,6 @@ def submit():
         pass
 
     # Sort by score desc, timestamp asc
-    def parse_timestamp(ts):
-        try:
-            return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
-        except Exception:
-            return datetime.min
     leaderboard.sort(key=lambda x: (-x[1], parse_timestamp(x[2])))
 
     return render_template(
@@ -169,3 +170,24 @@ def submit():
         results=results,
         leaderboard=leaderboard
     )
+
+@app.route('/leaderboard')
+def leaderboard_page():
+    leaderboard = []
+    try:
+        with open("leaderboard.txt", "r") as f:
+            for line in f:
+                parts = line.strip().split(",")
+                if len(parts) == 3:
+                    name, s, ts = parts
+                    leaderboard.append((name, int(s), ts))
+                elif len(parts) == 2:
+                    name, s = parts
+                    leaderboard.append((name, int(s), "N/A"))
+    except FileNotFoundError:
+        pass
+
+    # Sort by score desc, timestamp asc
+    leaderboard.sort(key=lambda x: (-x[1], parse_timestamp(x[2])))
+
+    return render_template("leaderboard.html", leaderboard=leaderboard, total=len(questions))
